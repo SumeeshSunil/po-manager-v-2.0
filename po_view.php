@@ -297,6 +297,11 @@ $itemResult = $itemStmt->get_result();
     margin-bottom: 20px;
   }
 
+  .table-scroll-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
   .table-card-header {
     padding: 16px 24px;
     background: #fafafa;
@@ -670,6 +675,7 @@ $itemResult = $itemStmt->get_result();
             <span class="section-dot"></span>
             <span>Items</span>
           </div>
+          <div class="table-scroll-wrapper">
           <table class="po-table">
             <thead>
               <tr>
@@ -708,6 +714,7 @@ $itemResult = $itemStmt->get_result();
               <?php endwhile; ?>
             </tbody>
           </table>
+          </div>
         </div>
 
         <button type="submit" class="btn-primary">
@@ -724,6 +731,7 @@ $itemResult = $itemStmt->get_result();
         <span class="section-dot"></span>
         <span>Items</span>
       </div>
+      <div class="table-scroll-wrapper">
       <table class="po-table">
         <thead>
           <tr>
@@ -769,6 +777,7 @@ $itemResult = $itemStmt->get_result();
           <?php endwhile; ?>
         </tbody>
       </table>
+      </div>
     </div>
   <?php endif; ?>
 
@@ -779,6 +788,7 @@ $itemResult = $itemStmt->get_result();
     <h3>Short Delivery Preview</h3>
     <p>These items have deliverable quantity less than PO quantity. Please enter the reason.</p>
 
+    <div class="table-scroll-wrapper">
     <table class="po-table">
       <thead>
         <tr>
@@ -791,6 +801,7 @@ $itemResult = $itemStmt->get_result();
       </thead>
       <tbody id="shortPreviewBody"></tbody>
     </table>
+    </div>
 
     <div class="form-group" style="margin-top:16px;">
       <label>Reason</label>

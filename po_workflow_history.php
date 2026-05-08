@@ -223,7 +223,7 @@ function isImageFile(string $path): bool
 
   /* Note + file chips stacked */
   .note-cell  { display: flex; flex-direction: column; gap: 9px; }
-  .note-text  { color: #555; font-size: 12.5px; line-height: 1.55; }
+  .note-text  { color: #bf2222; background: #ffd1d1; text-align:center; padding: 2px; border-radius: 7px; font-size: 12.5px; line-height: 1.55; }
   .file-chips { display: flex; flex-wrap: wrap; gap: 7px; }
 
   .file-chip {
