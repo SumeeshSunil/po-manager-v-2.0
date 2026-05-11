@@ -1,5 +1,6 @@
 <?php
 include 'partials/header.php';
+echo $_SESSION['role'];
 checkLogin();
 
 $sql = "SELECT po.*, u.name AS creator_name
@@ -1811,6 +1812,359 @@ if (!$isAdmin) {
         fill: none;
         stroke-width: 2;
     }
+
+
+    /* //calendar */
+    /* ── Date Range Picker ── */
+    .date-range-trigger {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #f0f2f5;
+        border: 1.5px solid #e0e3e8;
+        border-radius: 8px;
+        padding: 6px 14px;
+        min-height: 40px;
+        cursor: pointer;
+        font-size: 13px;
+        font-family: 'DM Sans', sans-serif;
+        color: #1a1a2e;
+        white-space: nowrap;
+        transition: border-color .15s, background .15s;
+        user-select: none;
+    }
+
+    .date-range-trigger:hover,
+    .date-range-trigger.drp-active {
+        border-color: #1a1a2e;
+        background: #e8eaed;
+    }
+
+    .date-range-trigger.drp-has-val {
+        background: #1a1a2e;
+        color: #fff;
+        border-color: #1a1a2e;
+    }
+
+    .date-range-trigger svg {
+        width: 14px;
+        height: 14px;
+        stroke: #aaa;
+        fill: none;
+        stroke-width: 2;
+        flex-shrink: 0;
+    }
+
+    .date-range-trigger.drp-has-val svg {
+        stroke: rgba(255, 255, 255, .6);
+    }
+
+    .drp-x-btn {
+        width: 17px;
+        height: 17px;
+        background: rgba(255, 255, 255, .18);
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        flex-shrink: 0;
+        margin-left: 2px;
+        transition: background .15s;
+    }
+
+    .drp-x-btn:hover {
+        background: rgba(255, 255, 255, .35);
+    }
+
+    .drp-x-btn svg {
+        width: 9px;
+        height: 9px;
+        stroke: #fff;
+        stroke-width: 2.5;
+    }
+
+    .drp-popup {
+        display: none;
+        position: fixed;
+        z-index: 99999;
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 8px 40px rgba(0, 0, 0, .18), 0 2px 12px rgba(0, 0, 0, .08);
+        padding: 20px;
+        font-family: 'DM Sans', sans-serif;
+        width: 316px;
+        border: 1px solid #e8eaed;
+        animation: drpSlideIn .18s ease both;
+    }
+
+    .drp-popup.drp-visible {
+        display: block;
+    }
+
+    @keyframes drpSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-8px) scale(.97);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .drp-cal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 14px;
+    }
+
+    .drp-nav {
+        width: 32px;
+        height: 32px;
+        border: 1.5px solid #e0e3e8;
+        border-radius: 8px;
+        background: #fafafa;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background .12s, border-color .12s;
+    }
+
+    .drp-nav:hover {
+        background: #1a1a2e;
+        border-color: #1a1a2e;
+    }
+
+    .drp-nav:hover svg {
+        stroke: #fff;
+    }
+
+    .drp-nav svg {
+        width: 15px;
+        height: 15px;
+        stroke: #666;
+        fill: none;
+        stroke-width: 2.2;
+    }
+
+    .drp-month-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: #1a1a2e;
+        letter-spacing: -.2px;
+    }
+
+    .drp-weekrow {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        margin-bottom: 4px;
+    }
+
+    .drp-wd {
+        text-align: center;
+        font-size: 11px;
+        font-weight: 700;
+        color: #bbb;
+        padding: 5px 0;
+        letter-spacing: .4px;
+    }
+
+    .drp-daygrid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 2px;
+    }
+
+    .drp-cell {
+        aspect-ratio: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 500;
+        color: #1a1a2e;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background .1s, color .1s;
+        position: relative;
+    }
+
+    .drp-cell:hover:not(.drp-empty) {
+        background: #f0f2f5;
+    }
+
+    .drp-empty {
+        cursor: default;
+    }
+
+    .drp-today:not(.drp-start):not(.drp-end):not(.drp-inrange) {
+        font-weight: 700;
+    }
+
+    .drp-today:not(.drp-start):not(.drp-end)::after {
+        content: '';
+        position: absolute;
+        bottom: 4px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: #1a1a2e;
+    }
+
+    .drp-start,
+    .drp-end {
+        background: #1a1a2e !important;
+        color: #fff !important;
+        border-radius: 8px !important;
+        font-weight: 700;
+        z-index: 2;
+    }
+
+    .drp-start::after,
+    .drp-end::after {
+        display: none;
+    }
+
+    .drp-inrange {
+        background: #e8eaf0;
+        color: #1a1a2e;
+        border-radius: 0;
+    }
+
+    .drp-start.drp-inrange {
+        border-radius: 8px 0 0 8px !important;
+    }
+
+    .drp-end.drp-inrange {
+        border-radius: 0 8px 8px 0 !important;
+    }
+
+    .drp-start.drp-end {
+        border-radius: 8px !important;
+    }
+
+    .drp-hovrange {
+        background: #f0f1f8;
+        border-radius: 0;
+    }
+
+    .drp-hovstart {
+        border-radius: 8px 0 0 8px;
+    }
+
+    .drp-hovend {
+        border-radius: 0 8px 8px 0;
+    }
+
+    .drp-hint {
+        font-size: 11px;
+        color: #bbb;
+        text-align: center;
+        margin-top: 10px;
+        font-style: italic;
+    }
+
+    .drp-footer {
+        margin-top: 14px;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        padding-top: 12px;
+        border-top: 1px solid #f0f2f5;
+    }
+
+    .drp-rng-label {
+        flex: 1;
+        font-size: 12px;
+        color: #888;
+        font-weight: 500;
+    }
+
+    .drp-rng-label strong {
+        color: #1a1a2e;
+    }
+
+    .drp-btn-clear {
+        padding: 7px 12px;
+        border-radius: 8px;
+        border: 1.5px solid #e0e3e8;
+        background: #f0f2f5;
+        color: #555;
+        font-size: 12px;
+        font-weight: 600;
+        font-family: 'DM Sans', sans-serif;
+        cursor: pointer;
+    }
+
+    .drp-btn-clear:hover {
+        background: #e4e7ec;
+    }
+
+    .drp-btn-apply {
+        padding: 7px 16px;
+        border-radius: 8px;
+        border: none;
+        background: #1a1a2e;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+        font-family: 'DM Sans', sans-serif;
+        cursor: pointer;
+    }
+
+    .drp-btn-apply:hover {
+        background: #2d2d4e;
+    }
+
+
+    .export-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        font-family: 'DM Sans', sans-serif;
+        cursor: pointer;
+        border: 1.5px solid transparent;
+        transition: background .15s;
+        white-space: nowrap;
+    }
+
+    .export-btn svg {
+        width: 13px;
+        height: 13px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 2;
+    }
+
+    .export-btn-excel {
+        background: #e8f5e9;
+        color: #2e7d32;
+        border-color: #c8e6c9;
+    }
+
+    .export-btn-excel:hover {
+        background: #c8e6c9;
+    }
+
+    .export-btn-pdf {
+        background: #ffebee;
+        color: #c62828;
+        border-color: #ffcdd2;
+    }
+
+    .export-btn-pdf:hover {
+        background: #ffcdd2;
+    }
 </style>
 
 <div class="dash-page">
@@ -1900,12 +2254,32 @@ if (!$isAdmin) {
             <div class="table-card-header-left">
                 <div class="section-dot"></div>
                 <span class="hdr-title">All Purchase Orders</span>
-            </div>
-            <div class="table-card-header-right">
+
+                <!-- ADD THESE TWO BUTTONS: -->
+                <button type="button" class="export-btn export-btn-excel" onclick="exportExcel()">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="8" y1="13" x2="16" y2="13" />
+                        <line x1="8" y1="17" x2="16" y2="17" />
+                    </svg>
+                    Excel
+                </button>
+                <button type="button" class="export-btn export-btn-pdf" onclick="exportPdf()">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="9" y1="15" x2="15" y2="15" />
+                    </svg>
+                    PDF
+                </button>
                 <div id="refresh-pill">
                     <span id="refresh-dot"></span>
                     <span id="refresh-label">Refresh in 10s</span>
                 </div>
+            </div>
+            <div class="table-card-header-right">
+
                 <div class="filters-wrap">
                     <div id="locked-company-wrap" style="display:none">
                         <div class="locked-company-pill">
@@ -1957,14 +2331,20 @@ if (!$isAdmin) {
                             <?php endforeach; ?>
                         </select>
                     </div>
-                    <div class="filter-box">
+                    <div id="drp-trigger" class="date-range-trigger" onclick="drpToggle()">
                         <svg viewBox="0 0 24 24">
                             <path d="M8 2v4" />
                             <path d="M16 2v4" />
                             <rect x="3" y="4" width="18" height="18" rx="2" />
                             <path d="M3 10h18" />
                         </svg>
-                        <input type="date" id="date-filter" title="Filter by release date">
+                        <span id="drp-trigger-label">Select Date Range</span>
+                        <span class="drp-x-btn" id="drp-x-btn" style="display:none" onclick="drpClear(event)">
+                            <svg viewBox="0 0 24 24">
+                                <line x1="18" y1="6" x2="6" y2="18" />
+                                <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                        </span>
                     </div>
                     <button type="button" class="clear-filters-btn" id="clear-filters-btn">Clear Filters</button>
                 </div>
@@ -2263,6 +2643,39 @@ if (!$isAdmin) {
             </table>
         </div>
     </div>
+
+    <!-- ── Date Range Picker Popup ── -->
+    <div class="drp-popup" id="drp-popup">
+        <div class="drp-cal-header">
+            <button type="button" class="drp-nav" id="drp-prev-btn">
+                <svg viewBox="0 0 24 24">
+                    <polyline points="15 18 9 12 15 6" />
+                </svg>
+            </button>
+            <span class="drp-month-title" id="drp-month-title"></span>
+            <button type="button" class="drp-nav" id="drp-next-btn">
+                <svg viewBox="0 0 24 24">
+                    <polyline points="9 18 15 12 9 6" />
+                </svg>
+            </button>
+        </div>
+        <div class="drp-weekrow">
+            <div class="drp-wd">Su</div>
+            <div class="drp-wd">Mo</div>
+            <div class="drp-wd">Tu</div>
+            <div class="drp-wd">We</div>
+            <div class="drp-wd">Th</div>
+            <div class="drp-wd">Fr</div>
+            <div class="drp-wd">Sa</div>
+        </div>
+        <div class="drp-daygrid" id="drp-daygrid"></div>
+        <div class="drp-hint" id="drp-hint">Click to select start date</div>
+        <div class="drp-footer">
+            <div class="drp-rng-label" id="drp-rng-label">—</div>
+            <button type="button" class="drp-btn-clear" onclick="drpClear()">Clear</button>
+            <button type="button" class="drp-btn-apply" onclick="drpApply()">Apply</button>
+        </div>
+    </div>
 </div>
 
 <!-- Toast container -->
@@ -2475,6 +2888,9 @@ if (!$isAdmin) {
     </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
 <script>
     var progressSection = document.getElementById('progress-bars-section');
     var toggleProgressBtn = document.getElementById('toggle-progress-bars');
@@ -2496,7 +2912,7 @@ if (!$isAdmin) {
         var statusFilter = document.getElementById('status-filter');
         var factoryFilter = document.getElementById('factory-filter');
         var factoryBox = document.getElementById('factory-filter-box');
-        var dateFilter = document.getElementById('date-filter');
+        // var dateFilter = document.getElementById('date-filter');
         var clearBtn = document.getElementById('clear-filters-btn');
         var pill = document.getElementById('refresh-pill');
         var pillLbl = document.getElementById('refresh-label');
@@ -2687,8 +3103,8 @@ if (!$isAdmin) {
             return {
                 search: (searchInput.value || '').trim().toLowerCase(),
                 status: (statusFilter.value || '').trim().toLowerCase(),
-                factory: (factoryFilter.value || '').trim(),
-                date: (dateFilter.value || '').trim()
+                factory: (factoryFilter.value || '').trim()
+                // date: (dateFilter.value || '').trim()
             };
         }
 
@@ -2702,7 +3118,14 @@ if (!$isAdmin) {
             if (filters.search && !searchText.includes(filters.search)) return false;
             if (filters.status && String(row.po_status || '').toLowerCase() !== filters.status) return false;
             if (filters.factory && String(row.factory_name || '') !== filters.factory) return false;
-            if (filters.date && normalizeDate(row.release_date) !== filters.date) return false;
+            if (window._drpStart || window._drpEnd) {
+                var rd = row.release_date;
+                if (!rd) return false;
+                var rowDt = new Date(rd.length === 10 ? rd + 'T00:00:00' : rd);
+                if (isNaN(rowDt.getTime())) return false;
+                if (window._drpStart && rowDt < window._drpStart) return false;
+                if (window._drpEnd && rowDt > window._drpEnd) return false;
+            }
             return true;
         }
 
@@ -2711,6 +3134,7 @@ if (!$isAdmin) {
             var filtered = allRows.filter(function(r) {
                 return rowMatchesFilters(r, filters);
             });
+            window._filteredRows = filtered;
             renderTable(filtered);
             updateCards(filtered);
             updateDateAlertBar('expiry', calculateDateAlertStats(filtered, 'expiry_date'), 'expiry date');
@@ -2819,12 +3243,12 @@ if (!$isAdmin) {
         if (searchInput) searchInput.addEventListener('input', applyFiltersAndRender);
         if (statusFilter) statusFilter.addEventListener('change', applyFiltersAndRender);
         if (factoryFilter) factoryFilter.addEventListener('change', applyFiltersAndRender);
-        if (dateFilter) dateFilter.addEventListener('change', applyFiltersAndRender);
+        // if (dateFilter) dateFilter.addEventListener('change', applyFiltersAndRender);
         if (clearBtn) clearBtn.addEventListener('click', function() {
             searchInput.value = '';
             statusFilter.value = '';
             if (!lockedFactory) factoryFilter.value = '';
-            dateFilter.value = '';
+            if (typeof drpClear === 'function') drpClear();
             applyFiltersAndRender();
         });
 
@@ -3575,6 +3999,440 @@ if (!$isAdmin) {
         e.preventDefault();
         tableDrag.scrollLeft = scrollLeft - (e.pageX - tableDrag.offsetLeft - startX) * 1.5;
     });
+
+    /* ── Date Range Picker ── */
+    (function() {
+        var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August',
+            'September', 'October', 'November', 'December'
+        ];
+        var today = new Date();
+        today.setHours(0, 0, 0, 0);
+        var vy = today.getFullYear(),
+            vm = today.getMonth();
+        var drpStart = null,
+            drpEnd = null,
+            drpHov = null;
+        var drpIsOpen = false;
+
+        var popup = document.getElementById('drp-popup');
+        var trigger = document.getElementById('drp-trigger');
+        var trigLbl = document.getElementById('drp-trigger-label');
+        var xBtn = document.getElementById('drp-x-btn');
+        var grid = document.getElementById('drp-daygrid');
+        var monTtl = document.getElementById('drp-month-title');
+        var rngLbl = document.getElementById('drp-rng-label');
+        var hintEl = document.getElementById('drp-hint');
+
+        function pad(n) {
+            return String(n).padStart(2, '0');
+        }
+
+        function sameDay(a, b) {
+            return a && b &&
+                a.getFullYear() === b.getFullYear() &&
+                a.getMonth() === b.getMonth() &&
+                a.getDate() === b.getDate();
+        }
+
+        function fmtShort(d) {
+            return d ? pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear() : '—';
+        }
+
+        function dtOf(s) {
+            return new Date(s + 'T00:00:00');
+        }
+
+        function renderCal() {
+            monTtl.textContent = MONTHS[vm] + ' ' + vy;
+            var firstDay = new Date(vy, vm, 1).getDay();
+            var dim = new Date(vy, vm + 1, 0).getDate();
+            var html = '';
+
+            for (var i = 0; i < firstDay; i++)
+                html += '<div class="drp-cell drp-empty"></div>';
+
+            for (var d = 1; d <= dim; d++) {
+                var dt = new Date(vy, vm, d);
+                var ds = vy + '-' + pad(vm + 1) + '-' + pad(d);
+                var cls = ['drp-cell'];
+
+                var isStart = sameDay(dt, drpStart);
+                var isEnd = drpEnd && sameDay(dt, drpEnd);
+                var isInRange = drpStart && drpEnd && dt > drpStart && dt < drpEnd;
+                var isHov = drpStart && !drpEnd && drpHov &&
+                    ((dt > drpStart && dt <= drpHov) ||
+                        (dt < drpStart && dt >= drpHov));
+                var isHovStart = isHov && sameDay(dt, drpStart);
+                var isHovEnd = isHov && sameDay(dt, drpHov);
+
+                if (sameDay(dt, today)) cls.push('drp-today');
+                if (isStart) cls.push('drp-start');
+                if (isEnd) cls.push('drp-end');
+                if (isInRange) cls.push('drp-inrange');
+                if (isHov && !isStart && !isHovEnd) cls.push('drp-hovrange');
+                if (isHovEnd && !sameDay(drpStart, drpHov)) cls.push('drp-hovend');
+                if (isStart && drpEnd && !sameDay(drpStart, drpEnd)) cls.push('drp-inrange');
+
+                html += '<div class="' + cls.join(' ') + '" data-ds="' + ds + '">' + d + '</div>';
+            }
+            grid.innerHTML = html;
+            updateFooter();
+        }
+
+        function updateFooter() {
+            if (drpStart && drpEnd) {
+                rngLbl.innerHTML = '<strong>' + fmtShort(drpStart) + '</strong> → <strong>' + fmtShort(drpEnd) + '</strong>';
+                hintEl.textContent = 'Range selected — click Apply';
+            } else if (drpStart) {
+                rngLbl.innerHTML = '<strong>' + fmtShort(drpStart) + '</strong> → ?';
+                hintEl.textContent = 'Click to select end date';
+            } else {
+                rngLbl.textContent = '—';
+                hintEl.textContent = 'Click to select start date';
+            }
+        }
+
+        grid.addEventListener('click', function(e) {
+            var el = e.target.closest('.drp-cell:not(.drp-empty)');
+            if (!el) return;
+            e.stopPropagation();
+            var dt = dtOf(el.dataset.ds);
+            if (!drpStart || (drpStart && drpEnd)) {
+                drpStart = dt;
+                drpEnd = null;
+                drpHov = null;
+            } else {
+                if (dt < drpStart) {
+                    drpEnd = drpStart;
+                    drpStart = dt;
+                } else {
+                    drpEnd = dt;
+                }
+                drpHov = null;
+            }
+            renderCal();
+        });
+
+        grid.addEventListener('mouseover', function(e) {
+            if (drpEnd || !drpStart) return;
+            var el = e.target.closest('.drp-cell:not(.drp-empty)');
+            if (!el) {
+                if (drpHov) {
+                    drpHov = null;
+                    renderCal();
+                }
+                return;
+            }
+            var dt = dtOf(el.dataset.ds);
+            if (!sameDay(dt, drpHov)) {
+                drpHov = dt;
+                renderCal();
+            }
+        });
+        grid.addEventListener('mouseleave', function() {
+            if (drpHov && !drpEnd) {
+                drpHov = null;
+                renderCal();
+            }
+        });
+
+        document.getElementById('drp-prev-btn').addEventListener('click', function() {
+            vm--;
+            if (vm < 0) {
+                vm = 11;
+                vy--;
+            }
+            renderCal();
+        });
+        document.getElementById('drp-next-btn').addEventListener('click', function() {
+            vm++;
+            if (vm > 11) {
+                vm = 0;
+                vy++;
+            }
+            renderCal();
+        });
+
+        function positionPopup() {
+            var r = trigger.getBoundingClientRect();
+            var pw = 316;
+            var left = r.left;
+            if (left + pw > window.innerWidth - 12) left = window.innerWidth - pw - 12;
+            if (left < 8) left = 8;
+            popup.style.left = left + 'px';
+            popup.style.top = (r.bottom + 8) + 'px';
+        }
+
+        window.drpToggle = function() {
+            drpIsOpen = !drpIsOpen;
+            if (drpIsOpen) {
+                renderCal();
+                popup.classList.add('drp-visible');
+                trigger.classList.add('drp-active');
+                positionPopup();
+            } else {
+                popup.classList.remove('drp-visible');
+                trigger.classList.remove('drp-active');
+            }
+        };
+
+        window.drpClear = function(e) {
+            if (e) e.stopPropagation();
+            drpStart = null;
+            drpEnd = null;
+            drpHov = null;
+            window._drpStart = null;
+            window._drpEnd = null;
+            trigLbl.textContent = 'Select Date Range';
+            trigger.classList.remove('drp-has-val');
+            xBtn.style.display = 'none';
+            popup.classList.remove('drp-visible');
+            trigger.classList.remove('drp-active');
+            drpIsOpen = false;
+            if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+        };
+
+        window.drpApply = function() {
+            if (!drpStart) return;
+            var end = drpEnd || drpStart;
+            window._drpStart = new Date(drpStart);
+            window._drpEnd = new Date(end);
+            window._drpEnd.setHours(23, 59, 59, 999);
+            trigLbl.textContent = sameDay(drpStart, end) ?
+                fmtShort(drpStart) :
+                fmtShort(drpStart) + ' – ' + fmtShort(end);
+            trigger.classList.add('drp-has-val');
+            xBtn.style.display = 'inline-flex';
+            popup.classList.remove('drp-visible');
+            trigger.classList.remove('drp-active');
+            drpIsOpen = false;
+            if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+        };
+
+        document.addEventListener('click', function(e) {
+            if (!drpIsOpen) return;
+            if (!popup.contains(e.target) && !trigger.contains(e.target)) {
+                popup.classList.remove('drp-visible');
+                trigger.classList.remove('drp-active');
+                drpIsOpen = false;
+            }
+        });
+        window.addEventListener('resize', function() {
+            if (drpIsOpen) positionPopup();
+        });
+        window.addEventListener('scroll', function() {
+            if (drpIsOpen) positionPopup();
+        }, true);
+
+        window._drpStart = null;
+        window._drpEnd = null;
+    })();
+
+    /* ── Export Helpers ── */
+    function _expFmtDate(d) {
+        if (!d) return '—';
+        if (/^\d{4}-\d{2}-\d{2}/.test(d)) {
+            var p = d.substring(0, 10).split('-');
+            return p[2] + '-' + p[1] + '-' + p[0];
+        }
+        var dt = new Date(d);
+        return isNaN(dt.getTime()) ? d : dt.toLocaleDateString('en-GB');
+    }
+
+    function _expFmtStatus(s) {
+        return (s || 'N/A').replace(/_/g, ' ').replace(/\b\w/g, function(c) {
+            return c.toUpperCase();
+        });
+    }
+
+    /* ── Excel (CSV) Export ── */
+    function exportExcel() {
+        var rows = window._filteredRows || [];
+        if (!rows.length) {
+            showToast('No data to export', 'error');
+            return;
+        }
+
+        var headers = [
+            '#', 'PO Number', 'Platform', 'Factory', 'Release Date', 'Expiry Date',
+            'Buyer Expected', 'Status', 'Expected Delivery', 'Schedule Date',
+            'Reschedule Date', 'Dispatch Vehicle', 'Dispatch Temp', 'Arrival Time',
+            'Arrival Temp', 'Handover', 'Created By'
+        ];
+
+        function esc(v) {
+            return '"' + String(v || '').replace(/"/g, '""') + '"';
+        }
+
+        var csvRows = [headers.map(esc).join(',')];
+        rows.forEach(function(r) {
+            csvRows.push([
+                r.id,
+                esc(r.po_number),
+                esc(r.platform),
+                esc(r.factory_name),
+                esc(_expFmtDate(r.release_date)),
+                esc(_expFmtDate(r.expiry_date)),
+                esc(_expFmtDate(r.buyer_expected_date)),
+                esc(_expFmtStatus(r.po_status)),
+                esc(_expFmtDate(r.expected_delivery_date)),
+                esc(_expFmtDate(r.delivery_schedule_date)),
+                esc(_expFmtDate(r.reschedule_date)),
+                esc(r.dispatch_vehicle_number),
+                esc(r.dispatch_temperature),
+                esc(r.arrival_time ? _expFmtDate(r.arrival_time) : ''),
+                esc(r.arrival_temperature),
+                esc(r.handover_status || 'pending'),
+                esc(r.creator_name)
+            ].join(','));
+        });
+
+        var blob = new Blob(['\ufeff' + csvRows.join('\n')], {
+            type: 'text/csv;charset=utf-8;'
+        });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'purchase_orders_' + new Date().toISOString().slice(0, 10) + '.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('✅ Excel file downloaded!', 'success');
+    }
+
+    /* ── PDF Export ── */
+    function exportPdf() {
+        var rows = window._filteredRows || [];
+        if (!rows.length) {
+            showToast('No data to export', 'error');
+            return;
+        }
+        if (typeof jspdf === 'undefined') {
+            showToast('PDF library not loaded', 'error');
+            return;
+        }
+
+        var doc = new jspdf.jsPDF({
+            orientation: 'landscape',
+            unit: 'mm',
+            format: 'a4'
+        });
+
+        // Header
+        doc.setFillColor(26, 26, 46);
+        doc.rect(0, 0, 297, 18, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(13);
+        doc.setFont(undefined, 'bold');
+        doc.text('Purchase Orders Report', 14, 11);
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'normal');
+        doc.text('Generated: ' + new Date().toLocaleDateString('en-GB') + '   Total records: ' + rows.length, 14, 16);
+
+        // Stats row
+        var done = rows.filter(function(r) {
+            return (r.po_status || '').toLowerCase() === 'done';
+        }).length;
+        var rejected = rows.filter(function(r) {
+            return (r.po_status || '').toLowerCase() === 'rejected';
+        }).length;
+        var open = rows.length - done - rejected;
+        doc.setTextColor(26, 26, 46);
+        doc.setFontSize(9);
+        doc.text('Open: ' + open + '   Done: ' + done + '   Rejected: ' + rejected, 200, 11);
+
+        // Table
+        var tableHeaders = [
+            ['#', 'PO Number', 'Platform', 'Factory', 'Release Date', 'Status', 'Schedule Date', 'Buyer Expected', 'Created By']
+        ];
+        var tableData = rows.map(function(r) {
+            return [
+                r.id,
+                r.po_number || '',
+                r.platform || '',
+                r.factory_name || '',
+                _expFmtDate(r.release_date),
+                _expFmtStatus(r.po_status),
+                _expFmtDate(r.delivery_schedule_date),
+                _expFmtDate(r.buyer_expected_date),
+                r.creator_name || ''
+            ];
+        });
+
+        doc.autoTable({
+            head: tableHeaders,
+            body: tableData,
+            startY: 22,
+            styles: {
+                fontSize: 8,
+                cellPadding: 2.5,
+                textColor: [51, 51, 51]
+            },
+            headStyles: {
+                fillColor: [26, 26, 46],
+                textColor: 255,
+                fontStyle: 'bold',
+                fontSize: 8
+            },
+            alternateRowStyles: {
+                fillColor: [248, 249, 250]
+            },
+            columnStyles: {
+                0: {
+                    cellWidth: 10
+                },
+                1: {
+                    cellWidth: 30
+                },
+                2: {
+                    cellWidth: 22
+                },
+                5: {
+                    cellWidth: 30
+                }
+            },
+            didDrawCell: function(data) {
+                // Color-code status column
+                if (data.section === 'body' && data.column.index === 5) {
+                    var status = (data.cell.raw || '').toLowerCase();
+                    var colors = {
+                        'done': [46, 125, 50],
+                        'rejected': [198, 40, 40],
+                        'pending': [245, 127, 23],
+                        'in progress': [21, 101, 192]
+                    };
+                    var col = colors[status];
+                    if (col) {
+                        doc.setTextColor(col[0], col[1], col[2]);
+                        doc.setFontSize(8);
+                        doc.text(data.cell.raw, data.cell.x + 2, data.cell.y + data.cell.height / 2 + 1);
+                        doc.setTextColor(51, 51, 51);
+                    }
+                }
+            },
+            margin: {
+                left: 14,
+                right: 14
+            }
+        });
+
+        // Footer
+        var pageCount = doc.internal.getNumberOfPages();
+        for (var i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(8);
+            doc.setTextColor(170, 170, 170);
+            doc.text('Page ' + i + ' of ' + pageCount, 148, doc.internal.pageSize.height - 5, {
+                align: 'center'
+            });
+        }
+
+        doc.save('purchase_orders_' + new Date().toISOString().slice(0, 10) + '.pdf');
+        showToast('✅ PDF downloaded!', 'success');
+    }
+
+    setInterval(() => fetch('heartbeat.php'), 120000); // every 2 minutes
 </script>
 
 <?php include 'partials/footer.php'; ?>

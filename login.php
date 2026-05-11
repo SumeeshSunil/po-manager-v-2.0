@@ -19,6 +19,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_SESSION['username'] = $user['username'];
             $_SESSION['role'] = $user['role'];
 
+            $session_id = session_id();
+            $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+            $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
+
+            $ins = $conn->prepare("
+                INSERT INTO active_sessions (user_id, username, name, role, session_id, ip_address, user_agent)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE last_seen = NOW(), ip_address = VALUES(ip_address)
+            ");
+            $ins->bind_param(
+                "ississs",
+                $user['id'],
+                $user['username'],
+                $user['name'],
+                $user['role'],
+                $session_id,
+                $ip,
+                $ua
+            );
+            $ins->execute();
+
             header("Location: dashboard.php");
             exit();
         } else {
@@ -39,7 +60,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <title>Login</title>
     <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
     <link rel="shortcut icon" href="assets/images/favicon.svg">
-
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         * {
@@ -268,6 +288,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </div>
         </div>
     </div>
+
+    <script>
+        // Heartbeat — keeps session alive and last_seen updated every 2 minutes
+        // Only runs after a successful login (session exists)
+        <?php if (isset($_SESSION['user_id'])): ?>
+            setInterval(() => fetch('heartbeat.php'), 120000);
+        <?php endif; ?>
+    </script>
 </body>
 
 </html>

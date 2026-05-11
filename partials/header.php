@@ -1,4 +1,12 @@
-<?php require_once 'config.php';
+<?php
+ob_start();
+require_once 'config.php';
+
+$current = basename($_SERVER['PHP_SELF']);
+if (!isset($_SESSION['user_id']) && !in_array($current, ['login.php', 'logout.php'])) {
+    header("Location: login.php");
+    exit();
+}
 
 if (!isset($_SESSION['user_company']) && isset($_SESSION['user_id'])) {
     $stmt = $conn->prepare("SELECT company FROM users WHERE id = ?");
@@ -8,6 +16,7 @@ if (!isset($_SESSION['user_company']) && isset($_SESSION['user_id'])) {
     if (!empty($r['company'])) $_SESSION['user_company'] = $r['company'];
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -282,16 +291,15 @@ if (!isset($_SESSION['user_company']) && isset($_SESSION['user_id'])) {
                     <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'super'): ?>
                         <a href="create_user.php">Create User</a>
                         <a href="users_list.php">View Users</a>
+                        <a href="active_users.php">Active Users</a>
                     <?php endif; ?>
 
                     <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
                         <a href="create_po.php">Create PO</a>
+                        <a href="active_users.php">Active Users</a>
                     <?php endif; ?>
 
-                    <?php if (isset($_SESSION['role']) && in_array($_SESSION['role'], ['super', 'admin', 'viewer'])): ?>
-                        <a href="pending_items.php">Pending Items</a>
-                    <?php endif; ?>
-                    <?php if (isset($_SESSION['role']) && in_array($_SESSION['role'], ['user'])): ?>
+                    <?php if (isset($_SESSION['role'])): ?>
                         <a href="pending_items.php">Pending Items</a>
                     <?php endif; ?>
                 </div>
@@ -319,3 +327,8 @@ if (!isset($_SESSION['user_company']) && isset($_SESSION['user_id'])) {
     </div>
 
     <div class="page-shell">
+        <?php if (isset($_SESSION['user_id'])): ?>
+            <script>
+                setInterval(() => fetch('heartbeat.php'), 120000);
+            </script>
+        <?php endif; ?>

@@ -10,6 +10,7 @@ function calcDateStats(array $rows, string $field): array
     $safe = 0;
     $near = 0;
     $reached = 0;
+    $expired = 0;
 
     foreach ($rows as $r) {
         $value = trim($r[$field] ?? '');
@@ -29,22 +30,26 @@ function calcDateStats(array $rows, string $field): array
         $diffDays = floor(($ts - $today) / 86400);
 
         if ($diffDays < 0) {
-            $reached++;
+            $expired++;        // Past — date already gone
+        } elseif ($diffDays === 0) {
+            $reached++;        // Exactly today — action needed now
         } elseif ($diffDays <= 3) {
-            $near++;
+            $near++;           // 1–3 days away — approaching
         } else {
-            $safe++;
+            $safe++;           // More than 3 days — all good
         }
     }
 
     return [
-        'total' => $total,
-        'safe' => $safe,
-        'near' => $near,
-        'reached' => $reached,
-        'safe_pct' => $total > 0 ? round(($safe / $total) * 100, 1) : 0,
-        'near_pct' => $total > 0 ? round(($near / $total) * 100, 1) : 0,
-        'reached_pct' => $total > 0 ? round(($reached / $total) * 100, 1) : 0,
+        'total'        => $total,
+        'safe'         => $safe,
+        'near'         => $near,
+        'reached'      => $reached,
+        'expired'      => $expired,
+        'safe_pct'     => $total > 0 ? round(($safe    / $total) * 100, 1) : 0,
+        'near_pct'     => $total > 0 ? round(($near    / $total) * 100, 1) : 0,
+        'reached_pct'  => $total > 0 ? round(($reached / $total) * 100, 1) : 0,
+        'expired_pct'  => $total > 0 ? round(($expired / $total) * 100, 1) : 0,
     ];
 }
 $expiryStats   = calcDateStats($rows, 'expiry_date');
@@ -138,6 +143,12 @@ $scheduleStats = calcDateStats($rows, 'delivery_schedule_date');
         transition: width 0.4s ease;
     }
 
+    .date-seg-expired {
+        background: #6d1b7b;
+        height: 100%;
+        transition: width 0.4s ease;
+    }
+
     .date-alert-legend {
         display: flex;
         flex-wrap: wrap;
@@ -160,17 +171,10 @@ $scheduleStats = calcDateStats($rows, 'delivery_schedule_date');
         flex-shrink: 0;
     }
 
-    .legend-safe {
-        background: #43a047;
-    }
-
-    .legend-near {
-        background: #fb8c00;
-    }
-
-    .legend-reached {
-        background: #e53935;
-    }
+    .legend-safe    { background: #43a047; }
+    .legend-near    { background: #fb8c00; }
+    .legend-reached { background: #e53935; }
+    .legend-expired { background: #6d1b7b; }
 
     .date-alert-note {
         margin-top: 14px;
@@ -184,65 +188,68 @@ $scheduleStats = calcDateStats($rows, 'delivery_schedule_date');
         <div class="date-alert-title">Date Alert Status</div>
     </div>
     <div class="date-alert-sub">
-        Green = safe, Orange = within 3 days, Red = action date reached/passed
+        Green = safe (&gt;3 days) &nbsp;&middot;&nbsp; Orange = near (1&ndash;3 days) &nbsp;&middot;&nbsp; Red = reached (today) &nbsp;&middot;&nbsp; Purple = expired (past)
     </div>
 
     <div class="date-alert-grid">
 
+        <!-- Expiry Date -->
         <div class="date-alert-box">
             <h4>Expiry Date</h4>
-            <div class="date-alert-meta" id="expiry-meta">
-                <?= $expiryStats['total'] ?> items with expiry date
-            </div>
+            <div class="date-alert-meta"><?= $expiryStats['total'] ?> items with expiry date</div>
             <div class="date-alert-track">
-                <div class="date-seg-safe" id="expiry-safe" style="width: <?= $expiryStats['safe_pct'] ?>%"></div>
-                <div class="date-seg-near" id="expiry-near" style="width: <?= $expiryStats['near_pct'] ?>%"></div>
-                <div class="date-seg-reached" id="expiry-reached" style="width: <?= $expiryStats['reached_pct'] ?>%"></div>
+                <div class="date-seg-safe"    style="width: <?= $expiryStats['safe_pct']    ?>%"></div>
+                <div class="date-seg-near"    style="width: <?= $expiryStats['near_pct']    ?>%"></div>
+                <div class="date-seg-reached" style="width: <?= $expiryStats['reached_pct'] ?>%"></div>
+                <div class="date-seg-expired" style="width: <?= $expiryStats['expired_pct'] ?>%"></div>
             </div>
-            <div class="date-alert-legend" id="expiry-legend">
-                <span class="legend-item"><span class="legend-dot legend-safe"></span> Safe: <?= $expiryStats['safe'] ?></span>
-                <span class="legend-item"><span class="legend-dot legend-near"></span> Near: <?= $expiryStats['near'] ?></span>
+            <div class="date-alert-legend">
+                <span class="legend-item"><span class="legend-dot legend-safe"></span>    Safe: <?=    $expiryStats['safe']    ?></span>
+                <span class="legend-item"><span class="legend-dot legend-near"></span>    Near: <?=    $expiryStats['near']    ?></span>
                 <span class="legend-item"><span class="legend-dot legend-reached"></span> Reached: <?= $expiryStats['reached'] ?></span>
+                <span class="legend-item"><span class="legend-dot legend-expired"></span> Expired: <?= $expiryStats['expired'] ?></span>
             </div>
         </div>
 
+        <!-- Expected Delivery Date -->
         <div class="date-alert-box">
             <h4>Expected Delivery Date</h4>
-            <div class="date-alert-meta" id="expected-meta">
-                <?= $expectedStats['total'] ?> items with expected delivery date
-            </div>
+            <div class="date-alert-meta"><?= $expectedStats['total'] ?> items with expected delivery date</div>
             <div class="date-alert-track">
-                <div class="date-seg-safe" id="expected-safe" style="width: <?= $expectedStats['safe_pct'] ?>%"></div>
-                <div class="date-seg-near" id="expected-near" style="width: <?= $expectedStats['near_pct'] ?>%"></div>
-                <div class="date-seg-reached" id="expected-reached" style="width: <?= $expectedStats['reached_pct'] ?>%"></div>
+                <div class="date-seg-safe"    style="width: <?= $expectedStats['safe_pct']    ?>%"></div>
+                <div class="date-seg-near"    style="width: <?= $expectedStats['near_pct']    ?>%"></div>
+                <div class="date-seg-reached" style="width: <?= $expectedStats['reached_pct'] ?>%"></div>
+                <div class="date-seg-expired" style="width: <?= $expectedStats['expired_pct'] ?>%"></div>
             </div>
-            <div class="date-alert-legend" id="expected-legend">
-                <span class="legend-item"><span class="legend-dot legend-safe"></span> Safe: <?= $expectedStats['safe'] ?></span>
-                <span class="legend-item"><span class="legend-dot legend-near"></span> Near: <?= $expectedStats['near'] ?></span>
+            <div class="date-alert-legend">
+                <span class="legend-item"><span class="legend-dot legend-safe"></span>    Safe: <?=    $expectedStats['safe']    ?></span>
+                <span class="legend-item"><span class="legend-dot legend-near"></span>    Near: <?=    $expectedStats['near']    ?></span>
                 <span class="legend-item"><span class="legend-dot legend-reached"></span> Reached: <?= $expectedStats['reached'] ?></span>
+                <span class="legend-item"><span class="legend-dot legend-expired"></span> Expired: <?= $expectedStats['expired'] ?></span>
             </div>
         </div>
 
+        <!-- Schedule Date -->
         <div class="date-alert-box">
             <h4>Schedule Date</h4>
-            <div class="date-alert-meta" id="schedule-meta">
-                <?= $scheduleStats['total'] ?> items with schedule date
-            </div>
+            <div class="date-alert-meta"><?= $scheduleStats['total'] ?> items with schedule date</div>
             <div class="date-alert-track">
-                <div class="date-seg-safe" id="schedule-safe" style="width: <?= $scheduleStats['safe_pct'] ?>%"></div>
-                <div class="date-seg-near" id="schedule-near" style="width: <?= $scheduleStats['near_pct'] ?>%"></div>
-                <div class="date-seg-reached" id="schedule-reached" style="width: <?= $scheduleStats['reached_pct'] ?>%"></div>
+                <div class="date-seg-safe"    style="width: <?= $scheduleStats['safe_pct']    ?>%"></div>
+                <div class="date-seg-near"    style="width: <?= $scheduleStats['near_pct']    ?>%"></div>
+                <div class="date-seg-reached" style="width: <?= $scheduleStats['reached_pct'] ?>%"></div>
+                <div class="date-seg-expired" style="width: <?= $scheduleStats['expired_pct'] ?>%"></div>
             </div>
-            <div class="date-alert-legend" id="schedule-legend">
-                <span class="legend-item"><span class="legend-dot legend-safe"></span> Safe: <?= $scheduleStats['safe'] ?></span>
-                <span class="legend-item"><span class="legend-dot legend-near"></span> Near: <?= $scheduleStats['near'] ?></span>
+            <div class="date-alert-legend">
+                <span class="legend-item"><span class="legend-dot legend-safe"></span>    Safe: <?=    $scheduleStats['safe']    ?></span>
+                <span class="legend-item"><span class="legend-dot legend-near"></span>    Near: <?=    $scheduleStats['near']    ?></span>
                 <span class="legend-item"><span class="legend-dot legend-reached"></span> Reached: <?= $scheduleStats['reached'] ?></span>
+                <span class="legend-item"><span class="legend-dot legend-expired"></span> Expired: <?= $scheduleStats['expired'] ?></span>
             </div>
         </div>
 
     </div>
 
     <div class="date-alert-note">
-        “Reached” means the date is today or already passed, so action is needed.
+        "Reached" = action due today &nbsp;&middot;&nbsp; "Expired" = date already passed, immediate attention required.
     </div>
 </div>
